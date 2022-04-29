@@ -1,0 +1,16 @@
+{
+  "name": "@huntharo/lambda-docker-typescript-esm-cjs-app",
+  "description": "Example of existing CJS app loaded into the ESM handler",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/server.js",
+  "type": "commonjs",
+  "repository": {
+    "url": "https://github.com/huntharo/lambda-docker-typescript-esm-func.git"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.77",
+    "@types/node": "^16.9.2"
+  },
+  "dependencies": {}
+}

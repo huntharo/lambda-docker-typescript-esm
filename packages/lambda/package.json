@@ -1,0 +1,17 @@
+{
+  "name": "@huntharo/lambda-docker-typescript-esm-func",
+  "description": "Lambda function that demonstrates async init with top-level await in a Lambda Docker function",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "type": "module",
+  "repository": {
+    "url": "https://github.com/huntharo/lambda-docker-typescript-esm-func.git"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.77",
+    "@types/node": "^16.9.2"
+  },
+  "dependencies": {
+  }
+}
