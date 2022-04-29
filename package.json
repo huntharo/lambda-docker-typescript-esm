@@ -2,10 +2,12 @@
   "name": "lambda-docker-typescript-esm",
   "version": "1.0.0",
   "description": "Demo of using ES modules in a TypeScript Docker Lambda",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "test-local-request": "curl -XPOST \"http://localhost:8080/2015-03-31/functions/function/invocations\" -d '{ \"isBase64Encoded\": false, \"body\": null, \"httpMethod\": \"GET\", \"path\": \"/\", \"requestContext\": { \"elb\": { \"targetGroupArn\": \"arn:aws:elb:us-east-1:123456789012:targetgroup/my-targets/73e2d6bc24d8a067\" } } }'",
+    "test-deployed-request": "curl -v",
+    "test-deployed-request-awscurl": "awscurl --service lambda -v",
     "run-app-built-sh": "docker-compose run --entrypoint /bin/sh app",
     "build": "tsc --build tsconfig.json",
     "build:cdk": "tsc --build ./packages/cdk/tsconfig.json",

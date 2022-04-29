@@ -1,18 +1,22 @@
 import { Construct } from 'constructs';
 import { Duration, RemovalPolicy, Tags } from 'aws-cdk-lib';
-import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
 
 interface ServiceProps {
-  readonly acmCertificate?: acm.ICertificate;
-
   /**
    * Architecture to build for and run on
    *
    * @default x86_64
    */
   readonly arch?: 'arm64' | 'x86_64';
+
+  /**
+   * Auth type to use
+   *
+   * @default NONE
+   */
+  readonly authType?: lambda.FunctionUrlAuthType;
 
   /**
    * Optional lambda function name.
@@ -73,6 +77,7 @@ export class ServiceConstruct extends Construct implements IServiceExports {
       lambdaFuncServiceName,
       memorySize = 512, // 1769 MB is 1 vCPU seconds of credits per second
       arch = 'x86_64',
+      authType = lambda.FunctionUrlAuthType.NONE,
     } = props;
 
     //
@@ -89,7 +94,7 @@ export class ServiceConstruct extends Construct implements IServiceExports {
       architecture: arch === 'x86_64' ? lambda.Architecture.X86_64 : lambda.Architecture.ARM_64,
       logRetention: logs.RetentionDays.ONE_MONTH,
       memorySize,
-      timeout: Duration.minutes(2),
+      timeout: Duration.seconds(20),
       // This doesn't actually add insights for Docker, but it does add the IAM
       // permissions... so... leave it here as a kludge.
       // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Lambda-Insights-Getting-Started-docker.html
@@ -107,7 +112,7 @@ export class ServiceConstruct extends Construct implements IServiceExports {
     }
 
     this._serviceFuncUrl = this._serviceFunc.addFunctionUrl({
-      authType: lambda.FunctionUrlAuthType.NONE,
+      authType,
     });
   }
 }

@@ -1,5 +1,6 @@
 import { Construct } from 'constructs';
-import { Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { TimeToLive } from '@cloudcomponents/cdk-temp-stack';
 import { ServiceConstruct } from './service-construct';
 
@@ -9,6 +10,13 @@ interface AppProps extends StackProps {
      * Time after which to automatically delete all resources.
      */
     readonly ttl?: Duration;
+
+    /**
+     * Auth type to use
+     *
+     * @default NONE
+     */
+    readonly authType?: lambda.FunctionUrlAuthType;
 
     /**
      * Number of concurrent executions to pre-provision.
@@ -21,21 +29,16 @@ interface AppProps extends StackProps {
   };
 }
 
-export interface IAppStack {
-  readonly service: ServiceConstruct;
-}
-
-export class AppStack extends Stack implements IAppStack {
-  private _service: ServiceConstruct;
-  public get service(): ServiceConstruct {
-    return this._service;
-  }
-
+export class AppStack extends Stack {
   constructor(scope: Construct, id: string, props: AppProps) {
     super(scope, id, props);
 
     const { local } = props;
-    const { ttl, provisionedConcurrentExecutions = 0 } = local;
+    const {
+      authType = lambda.FunctionUrlAuthType.NONE,
+      ttl,
+      provisionedConcurrentExecutions = 0,
+    } = local;
 
     // Set stack to delete if this is a PR build
     if (ttl !== undefined) {
@@ -47,25 +50,37 @@ export class AppStack extends Stack implements IAppStack {
     //
     // Create arm64 lambda
     //
-    new ServiceConstruct(this, 'service-arm64', {
+    const serviceARM = new ServiceConstruct(this, 'service-arm64', {
       memorySize: 512,
       arch: 'arm64',
       autoDeleteEverything: ttl !== undefined,
       provisionedConcurrentExecutions: provisionedConcurrentExecutions
         ? provisionedConcurrentExecutions
         : undefined,
+      authType,
     });
 
     //
     // Create amd64 lambda
     //
-    new ServiceConstruct(this, 'service-amd64', {
+    const serviceAMD = new ServiceConstruct(this, 'service-amd64', {
       memorySize: 512,
       arch: 'x86_64',
       autoDeleteEverything: ttl !== undefined,
       provisionedConcurrentExecutions: provisionedConcurrentExecutions
         ? provisionedConcurrentExecutions
         : undefined,
+      authType,
+    });
+
+    new CfnOutput(this, 'service-url-arm', {
+      value: serviceARM.serviceFuncUrl.url,
+      exportName: `${this.stackName}-service-url-arm`,
+    });
+
+    new CfnOutput(this, 'service-url-amd', {
+      value: serviceAMD.serviceFuncUrl.url,
+      exportName: `${this.stackName}-service-url-amd`,
     });
   }
 }

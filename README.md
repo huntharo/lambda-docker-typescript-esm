@@ -8,6 +8,12 @@ The [blog post](https://aws.amazon.com/blogs/compute/using-node-js-es-modules-an
 
 This example shows that the support does indeed exist within Docker-based Lambda functions.
 
+# Security Notice
+
+The AWS Lambda URLs are configured with security set to `lambda.FunctionUrlAuthType.NONE` so they are open to any caller on the Internet. If this violates your security policies, change the type from `lambda.FunctionUrlAuthType.NONE` to `lambda.FunctionUrlAuthType.AWS_IAM`, then use `awscurl` instead of `curl` to test the function invocation.
+
+[auth type config location](packages/cdk/bin/cdk.ts#L12)
+
 # Usage
 
 ```
@@ -28,6 +34,14 @@ npm run test-local-request
 
 # To deploy to an AWS account
 npx cdk deploy
+
+# Invoke the Lambda via unsigned URL
+npm run test-deployed-request -- [paste the URL here]
+
+# Invoke the Lambda via signed URL
+brew install awscurl
+cdk-sso-sync [profile-name] # If using `aws sso login`, `awscurl` needs help with SSO-style credentials
+npm run test-deployed-request-awscurl -- [paste the URL here]
 ```
 
 Note that local Docker-based Lambda testing differs from AWS deployed lambda testing in that the local Lambda will not run the init code until the first request is received, even with top-level `await` initialization. The handler file simply will not even be looked for until the first request when running locally, thus no init code can be run until that first request.
