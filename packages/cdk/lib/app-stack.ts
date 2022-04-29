@@ -61,6 +61,20 @@ export class AppStack extends Stack {
     });
 
     //
+    // Create arm64 lambda
+    //
+    const serviceARMZip = new ServiceConstruct(this, 'service-arm64-zip', {
+      memorySize: 512,
+      arch: 'arm64',
+      functionType: 'zip',
+      autoDeleteEverything: ttl !== undefined,
+      provisionedConcurrentExecutions: provisionedConcurrentExecutions
+        ? provisionedConcurrentExecutions
+        : undefined,
+      authType,
+    });
+
+    //
     // Create amd64 lambda
     //
     const serviceAMD = new ServiceConstruct(this, 'service-amd64', {
@@ -76,6 +90,11 @@ export class AppStack extends Stack {
     new CfnOutput(this, 'service-url-arm', {
       value: serviceARM.serviceFuncUrl.url,
       exportName: `${this.stackName}-service-url-arm`,
+    });
+
+    new CfnOutput(this, 'service-url-arm-zip', {
+      value: serviceARMZip.serviceFuncUrl.url,
+      exportName: `${this.stackName}-service-url-arm-zip`,
     });
 
     new CfnOutput(this, 'service-url-amd', {
