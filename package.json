@@ -14,8 +14,7 @@
     "build:rollup": "rollup --config",
     "clean": "tsc --build tsconfig.json --clean",
     "lint": "eslint ./ --ext .ts --ext .tsx",
-    "lint-and-fix": "eslint ./ --ext .ts --ext .tsx --fix",
-    "postinstall": "npx patch-package"
+    "lint-and-fix": "eslint ./ --ext .ts --ext .tsx --fix"
   },
   "files": [],
   "repository": {
